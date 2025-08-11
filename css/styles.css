@@ -1,0 +1,89 @@
+/* * Este archivo CSS es mínimo, ya que la mayor parte del estilo
+ * de la aplicación ahora es manejada por Tailwind CSS.
+ *
+ * Puedes agregar aquí estilos personalizados que no se puedan
+ * definir fácilmente con las clases de Tailwind.
+ */
+
+/* Fuentes y estilos generales */
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clases de utilidad para mostrar/ocultar páginas */
+.page {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.page.active {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+}
+
+/* Estilos para el menú de navegación móvil */
+.nav-menu.active {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    top: 64px; /* Altura de la nav bar */
+    left: 0;
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-menu.active li {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-menu.active li:last-child {
+    border-bottom: none;
+}
+
+/* Estilos de botones */
+.btn {
+    @apply font-bold py-2 px-4 rounded-md transition-colors duration-200;
+}
+
+.btn-primary {
+    @apply bg-primary text-white hover:bg-secondary;
+}
+
+.btn-success {
+    @apply bg-success text-white hover:bg-green-600;
+}
+
+.btn-danger {
+    @apply bg-danger text-white hover:bg-red-600;
+}
+
+/* Estilos para el contenedor de resultados de QR */
+#qr-result .result-container {
+    @apply p-4 rounded-lg shadow-md;
+}
+#qr-result .result-container.success {
+    @apply bg-green-100 border border-green-400 text-green-700;
+}
+#qr-result .result-container.error {
+    @apply bg-red-100 border border-red-400 text-red-700;
+}
+
+/* Estilos para el dashboard */
+#late-absent-list {
+    @apply space-y-4;
+}
+
+#late-absent-list .list-item {
+    @apply bg-gray-50 p-3 rounded-md shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0;
+}

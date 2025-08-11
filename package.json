@@ -1,0 +1,27 @@
+{
+  "name": "asistencia-escolar",
+  "version": "1.0.0",
+  "description": "Sistema de asistencia escolar con QR y notificaciones",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev",
+    "build": "echo 'No build needed'",
+    "deploy": "netlify deploy --prod"
+  },
+  "keywords": [
+    "asistencia",
+    "qr",
+    "netlify",
+    "supabase"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "date-fns": "^2.29.3",
+    "jspdf": "^2.5.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^12.0.0"
+  }
+}
