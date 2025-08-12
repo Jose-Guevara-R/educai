@@ -1,130 +1,72 @@
-// Este archivo contiene funciones refactorizadas para interactuar con las API del backend.
-// Se ha creado una función centralizada para el manejo de fetch.
+/**
+ * Este archivo contiene las funciones que se comunican con las funciones serverless de Netlify.
+ * Las funciones se han actualizado para usar los endpoints que interactúan con Google Sheets.
+ */
+
+const BASE_URL = '/.netlify/functions';
 
 /**
- * Muestra un modal con un mensaje y un título.
- * @param {string} title El título del modal.
- * @param {string} message El mensaje a mostrar.
- * @param {string} type El tipo de mensaje ('success' o 'error').
+ * Registra la asistencia de un estudiante.
+ * @param {string} dni - El DNI del estudiante a registrar.
+ * @returns {Promise<object>} - El resultado de la operación.
  */
-function showModal(title, message, type) {
-    const modal = document.getElementById('app-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalMessage = document.getElementById('modal-message');
-    const modalIcon = document.getElementById('modal-icon');
-
-    // Asignar el título y el mensaje
-    modalTitle.textContent = title;
-    modalMessage.textContent = message;
-
-    // Cambiar el icono y el color según el tipo de mensaje
-    if (type === 'success') {
-        modalIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-500"><path d="M20 6 9 17l-5-5"/></svg>`;
-        modalIcon.classList.remove('bg-red-100');
-        modalIcon.classList.add('bg-green-100');
-    } else {
-        modalIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x text-red-500"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
-        modalIcon.classList.remove('bg-green-100');
-        modalIcon.classList.add('bg-red-100');
-    }
-
-    modal.classList.remove('hidden');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('app-modal');
-    const closeButton = document.getElementById('modal-close-btn');
-
-    // Asegúrate de que el modal se cierre al hacer clic en el botón
-    if (closeButton) {
-        closeButton.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
-    }
-
-    // Cerrar el modal haciendo clic fuera de él
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.add('hidden');
-        }
-    });
-});
-
-/**
- * Función centralizada para realizar llamadas a la API y manejar errores.
- * @param {string} url La URL de la API.
- * @param {object} options Opciones para la llamada fetch.
- * @returns {Promise<object>} La respuesta parseada en JSON.
- */
-async function fetchWrapper(url, options = {}) {
+async function registerAttendance(dni) {
     try {
-        const response = await fetch(url, options);
-
-        if (!response.ok) {
-            // Manejar errores de la API (por ejemplo, 400, 404, 500)
-            const errorData = await response.json().catch(() => ({ message: `Error HTTP: ${response.status}` }));
-            throw new Error(errorData.error || errorData.message || `Error HTTP: ${response.status}`);
-        }
-
+        const response = await fetch(`${BASE_URL}/register-attendance`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ dni }),
+        });
+        
         return await response.json();
     } catch (error) {
-        console.error(`Error en la llamada a la API (${url}):`, error);
+        console.error('Error en registerAttendance:', error);
+        return { success: false, error: 'Error de conexión al registrar asistencia.' };
+    }
+}
+
+/**
+ * Obtiene la lista de tardanzas y faltas para una fecha específica.
+ * @param {string} date - La fecha en formato YYYY-MM-DD.
+ * @returns {Promise<Array<object>>} - La lista de estudiantes.
+ */
+async function getLateAbsent(date) {
+    try {
+        const response = await fetch(`${BASE_URL}/get-late-absent?date=${date}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            return data;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error('Error en getLateAbsent:', error);
         throw error;
     }
 }
 
-// Función para registrar asistencia
-async function registerAttendance(dni) {
-    return await fetchWrapper('/.netlify/functions/register-attendance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dni }),
-    });
-}
-
-// Función para obtener datos de un estudiante
-async function getStudent(dni) {
-    return await fetchWrapper(`/.netlify/functions/get-student?dni=${dni}`);
-}
-
-// Función para obtener reportes
-async function getReport(filters = {}) {
-    return await fetchWrapper('/.netlify/functions/get-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(filters),
-    });
-}
-
-// Función para generar reporte en PDF/Excel
-async function generateReport(params) {
-    return await fetchWrapper('/.netlify/functions/generate-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params),
-    });
-}
-
-// Función para obtener lista de tardanzas y faltas
-async function getLateAbsent(date) {
-    return await fetchWrapper(`/.netlify/functions/get-late-absent?date=${date}`);
-}
-
-// Función para obtener la ubicación actual del usuario (opcional, para futuras funcionalidades)
-async function getUserLocation() {
-    return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-            reject(new Error('La geolocalización no es compatible con este navegador.'));
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                resolve({ latitude, longitude });
+/**
+ * Genera un reporte de asistencia en PDF.
+ * @param {object} filters - Objeto con los filtros (grade, section, date).
+ * @returns {Promise<object>} - El resultado de la operación, incluyendo el PDF en base64.
+ */
+async function generateReport(filters) {
+    try {
+        const response = await fetch(`${BASE_URL}/generate-report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
-            (error) => {
-                reject(new Error(`Error al obtener la ubicación: ${error.message}`));
-            }
-        );
-    });
+            body: JSON.stringify(filters),
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error en generateReport:', error);
+        return { success: false, error: 'Error de conexión al generar el reporte.' };
+    }
 }
