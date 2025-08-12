@@ -39,61 +39,72 @@ document.addEventListener('DOMContentLoaded', () => {
             onScanError
         ).catch(err => {
             console.error(`Error al iniciar el escáner: ${err}`);
-            showModal('Error', 'No se pudo acceder a la cámara. Asegúrese de haber otorgado los permisos necesarios.', 'error');
+            // Verificar si scanResultDiv existe antes de modificarlo
+            if (scanResultDiv) {
+                scanResultDiv.innerHTML = `
+                    <div class="result-container error">
+                        <h3>Error</h3>
+                        <p>No se pudo acceder a la cámara. Asegúrese de haber otorgado los permisos necesarios.</p>
+                    </div>
+                `;
+            }
         });
     }
 
     /**
-     * Detiene el escáner de código QR si está en ejecución.
+     * Manejador de escaneo exitoso.
+     * @param {string} decodedText - El texto decodificado del código QR.
+     * @param {object} decodedResult - El objeto de resultado completo.
      */
-    function stopScanner() {
-        if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) {
-            html5QrcodeScanner.stop().then(() => {
-                console.log("Escáner detenido.");
+    async function onScanSuccess(decodedText, decodedResult) {
+        // Detener el escáner
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(ignore => {
+                console.log("Escáner detenido al escanear QR");
             }).catch(err => {
                 console.error(`Error al detener el escáner: ${err}`);
             });
         }
-    }
+        
+        // Verificar si el elemento de resultado existe
+        if (!scanResultDiv) {
+            console.error("El elemento 'scan-result' no fue encontrado en el DOM.");
+            return;
+        }
 
-    /**
-     * Manejador de éxito del escaneo.
-     * Procesa el DNI escaneado y registra la asistencia.
-     * @param {string} decodedText - El texto decodificado del QR.
-     * @param {object} decodedResult - El objeto de resultado completo.
-     */
-    async function onScanSuccess(decodedText, decodedResult) {
-        stopScanner();
-        scanResultDiv.innerHTML = `<p class="text-center text-gray-500">Escaneado. Procesando...</p>`;
-
+        scanResultDiv.innerHTML = `
+            <div class="p-4 bg-white rounded-lg shadow-lg">
+                <p class="text-gray-700 text-center">Escaneando...</p>
+            </div>
+        `;
+        
         try {
+            // Llamar a la función de la API para registrar asistencia
             const result = await registerAttendance(decodedText);
-
+            
+            // Si la respuesta es exitosa
             if (result.success) {
-                showModal(
-                    '¡Asistencia Registrada!',
-                    `DNI: ${decodedText}<br>Estudiante: ${result.student.nombre}<br>Estado: ${result.status}`,
-                    'success'
-                );
+                // Actualizar la interfaz de usuario con los detalles del estudiante
                 scanResultDiv.innerHTML = `
                     <div class="p-4 bg-white rounded-lg shadow-lg">
-                        <p class="text-success text-center font-bold text-lg">✅ Asistencia registrada</p>
-                        <p class="text-gray-700 text-center">Estudiante: ${result.student.nombre}</p>
-                        <p class="text-gray-700 text-center">Estado: ${result.status}</p>
+                        <p class="text-success text-center font-bold text-lg">✅ Asistencia Registrada</p>
+                        <p class="mt-2"><span class="font-bold">Estudiante:</span> ${result.student.nombre}</p>
+                        <p><span class="font-bold">Grado:</span> ${result.student.grado} - ${result.student.seccion}</p>
+                        <p><span class="font-bold">Estado:</span> ${result.status}</p>
+                        <p><span class="font-bold">Fecha:</span> ${result.date} - ${result.time}</p>
                     </div>
                 `;
             } else {
-                showModal('Error', result.error, 'error');
+                // Si la respuesta indica un error
                 scanResultDiv.innerHTML = `
                     <div class="p-4 bg-white rounded-lg shadow-lg">
-                        <p class="text-danger text-center font-bold text-lg">❌ Error al registrar</p>
-                        <p class="text-gray-700 text-center">${result.error}</p>
+                        <p class="text-danger text-center font-bold text-lg">❌ Error</p>
+                        <p class="text-gray-700 text-center">${result.error || 'Ocurrió un error al registrar la asistencia.'}</p>
                     </div>
                 `;
             }
         } catch (error) {
-            showModal('Error', 'Ocurrió un error al conectar con el servidor. Por favor, intente de nuevo.', 'error');
-            console.error('Error en onScanSuccess:', error);
+            // Si hay un error de conexión
             scanResultDiv.innerHTML = `
                 <div class="p-4 bg-white rounded-lg shadow-lg">
                     <p class="text-danger text-center font-bold text-lg">❌ Error de conexión</p>
@@ -125,10 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Escuchar el evento de cambio de página
     document.addEventListener('pageChanged', (e) => {
-        if (e.detail.pageId === 'scan') {
+        const targetPage = e.detail.pageId;
+        if (targetPage === 'scan') {
             startScanner();
-        } else {
-            stopScanner();
+        } else if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(ignore => {
+                console.log("Escáner detenido al cambiar de página");
+            }).catch(err => {
+                console.error(`Error al detener el escáner: ${err}`);
+            });
         }
     });
+
+    // Iniciar el escáner si la página inicial es la de escaneo
+    if (scanPage && scanPage.classList.contains('active')) {
+        startScanner();
+    }
 });
