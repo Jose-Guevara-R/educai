@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="images/logo.png">
+    
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -33,138 +34,136 @@
     <!-- Librerías externas -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide-js@latest"></script>
 </head>
-<body class="bg-light text-dark font-sans flex flex-col min-h-screen">
-    <!-- Contenedor principal de la aplicación -->
-    <div class="flex-grow flex flex-col">
+<body>
+    <div class="app-container">
         <!-- Barra de navegación -->
-        <nav class="bg-primary text-white p-4 flex justify-between items-center shadow-md">
-            <div class="flex items-center space-x-2">
-                <img src="images/logo.png" alt="Logo" class="w-8 h-8 rounded-full">
-                <span class="text-xl font-bold">Asistencia Escolar</span>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="images/logo.png" alt="Logo" class="nav-logo">
+                <span>Asistencia Escolar</span>
             </div>
-            <div class="md:hidden">
-                <button id="nav-toggle" class="text-white focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-                </button>
-            </div>
-            <ul id="nav-menu" class="hidden md:flex md:space-x-4 items-center">
-                <li><a href="#home" class="nav-link p-2 rounded hover:bg-secondary transition-colors">Inicio</a></li>
-                <li><a href="#scan" class="nav-link p-2 rounded hover:bg-secondary transition-colors">Escanear QR</a></li>
-                <li><a href="#manual" class="nav-link p-2 rounded hover:bg-secondary transition-colors">Registro Manual</a></li>
-                <li><a href="#dashboard" class="nav-link p-2 rounded hover:bg-secondary transition-colors">Dashboard</a></li>
-                <li><a href="#reports" class="nav-link p-2 rounded hover:bg-secondary transition-colors">Reportes</a></li>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">Inicio</a></li>
+                <li><a href="#scan" class="nav-link">Escanear QR</a></li>
+                <li><a href="#manual" class="nav-link">Registro Manual</a></li>
+                <li><a href="#dashboard" class="nav-link">Dashboard</a></li>
+                <li><a href="#reports" class="nav-link">Reportes</a></li>
             </ul>
+            <button class="nav-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
         </nav>
 
         <!-- Contenido principal -->
-        <main class="container mx-auto p-4 flex-grow">
-            <!-- Sección de Inicio -->
+        <main class="main-content">
+            <!-- Sección de inicio -->
             <section id="home" class="page active">
-                <h2 class="text-3xl font-bold text-center text-primary mb-6">Bienvenido al Sistema de Asistencia Escolar</h2>
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <p class="text-lg">Este sistema permite registrar la asistencia de los estudiantes de manera rápida y eficiente mediante el escaneo de códigos QR, registro manual y generación de reportes detallados.</p>
-                </div>
-            </section>
-
-            <!-- Sección de Escaneo QR -->
-            <section id="scan" class="page hidden">
-                <h2 class="text-3xl font-bold text-center text-primary mb-6">Escanear Código QR</h2>
-                <div class="flex flex-col items-center space-y-4">
-                    <div id="qr-reader" class="w-full max-w-sm aspect-video bg-gray-200 rounded-lg overflow-hidden"></div>
-                    <div id="qr-result" class="mt-4 w-full max-w-sm"></div>
-                </div>
-            </section>
-
-            <!-- Sección de Registro Manual -->
-            <section id="manual" class="page hidden">
-                <h2 class="text-3xl font-bold text-center text-primary mb-6">Registro Manual de Asistencia</h2>
-                <div class="bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
-                    <div class="mb-4">
-                        <label for="manual-dni" class="block text-sm font-medium text-gray-700">DNI del Estudiante:</label>
-                        <input type="text" id="manual-dni" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                <h2 class="page-title">Bienvenido al Sistema de Asistencia Escolar</h2>
+                <div class="dashboard-summary">
+                    <div class="card">
+                        <h3>Presentes</h3>
+                        <p id="present-count">0</p>
                     </div>
-                    <button id="register-manual" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-secondary transition-colors">
-                        Registrar Asistencia
-                    </button>
-                    <div id="manual-result" class="mt-4"></div>
-                </div>
-            </section>
-
-            <!-- Sección de Dashboard -->
-            <section id="dashboard" class="page hidden">
-                <h2 class="text-3xl font-bold text-center text-primary mb-6">Dashboard de Asistencia</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white p-6 rounded-lg shadow-lg">
-                        <h3 class="text-xl font-semibold mb-2">Resumen Diario</h3>
-                        <canvas id="daily-chart"></canvas>
+                    <div class="card">
+                        <h3>Tardanzas</h3>
+                        <p id="late-count">0</p>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-lg">
-                        <h3 class="text-xl font-semibold mb-2">Tardanzas y Faltas de Hoy</h3>
-                        <div id="late-absent-list" class="h-64 overflow-y-auto">
-                            <!-- Los resultados se inyectarán aquí -->
-                        </div>
-                        <div class="mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                            <button id="export-late-absent" class="w-full sm:w-auto bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors">
-                                Exportar a CSV
-                            </button>
-                            <button id="copy-api-url" class="w-full sm:w-auto bg-accent text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
-                                Copiar URL API
-                            </button>
-                        </div>
+                    <div class="card">
+                        <h3>Faltas</h3>
+                        <p id="absent-count">0</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Sección de Reportes -->
-            <section id="reports" class="page hidden">
-                <h2 class="text-3xl font-bold text-center text-primary mb-6">Generación de Reportes</h2>
-                <div class="bg-white p-6 rounded-lg shadow-lg report-form">
-                    <div class="flex flex-col">
-                        <label for="report-grade" class="text-sm font-medium text-gray-700">Grado:</label>
-                        <select id="report-grade" class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+            <!-- Sección de escaneo QR -->
+            <section id="scan" class="page">
+                <h2 class="page-title">Escanear Código QR</h2>
+                <div id="qr-reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
+                <div id="qr-result" class="result-container mt-4"></div>
+            </section>
+
+            <!-- Sección de registro manual -->
+            <section id="manual" class="page">
+                <h2 class="page-title">Registro Manual</h2>
+                <form id="manual-form" class="form">
+                    <div class="form-group">
+                        <label for="manual-dni">DNI del Estudiante:</label>
+                        <input type="text" id="manual-dni" name="dni" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar Asistencia</button>
+                </form>
+                <div id="manual-result" class="result-container mt-4"></div>
+            </section>
+            
+            <!-- Sección de dashboard -->
+            <section id="dashboard" class="page">
+                <h2 class="page-title">Dashboard</h2>
+                <div class="chart-container">
+                    <canvas id="attendance-chart"></canvas>
+                </div>
+                
+                <div class="late-absent-notifications mt-8">
+                    <h3>Tardanzas y Faltas de Hoy</h3>
+                    <div class="form-group">
+                        <label for="late-absent-date">Fecha:</label>
+                        <input type="date" id="late-absent-date">
+                        <button id="load-late-absent" class="btn btn-primary btn-small">Cargar</button>
+                    </div>
+                    <div id="late-absent-list" class="list-container mt-4"></div>
+                    <div class="action-buttons mt-4">
+                        <button id="export-excel" class="btn btn-primary">Exportar a Excel</button>
+                        <button id="copy-api-url" class="btn btn-secondary">Copiar URL de la API</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de reportes -->
+            <section id="reports" class="page">
+                <h2 class="page-title">Generar Reportes</h2>
+                <div class="report-form">
+                    <div class="form-group">
+                        <label for="report-grade">Grado:</label>
+                        <select id="report-grade">
                             <option value="">Todos</option>
-                            <option value="1ro">1ro</option>
-                            <option value="2do">2do</option>
-                            <option value="3ro">3ro</option>
-                            <option value="4to">4to</option>
-                            <option value="5to">5to</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
                         </select>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="report-section" class="text-sm font-medium text-gray-700">Sección:</label>
-                        <select id="report-section" class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                    <div class="form-group">
+                        <label for="report-section">Sección:</label>
+                        <select id="report-section">
                             <option value="">Todas</option>
                             <option value="A">A</option>
                             <option value="B">B</option>
                             <option value="C">C</option>
                         </select>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="report-date" class="text-sm font-medium text-gray-700">Fecha:</label>
-                        <input type="date" id="report-date" class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                    <div class="form-group">
+                        <label for="report-date">Fecha:</label>
+                        <input type="date" id="report-date">
                     </div>
-                    <button id="generate-report" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-secondary transition-colors">
-                        Generar Reporte
-                    </button>
+                    <button id="generate-report" class="btn btn-primary">Generar Reporte</button>
                 </div>
-                <div id="report-result" class="mt-6"></div>
+                
+                <div id="report-result" class="result-container"></div>
             </section>
         </main>
 
         <!-- Pie de página -->
-        <footer class="bg-dark text-white text-center p-4 mt-auto">
+        <footer class="footer">
             <p>&copy; 2023 Sistema de Asistencia Escolar. Todos los derechos reservados.</p>
         </footer>
     </div>
-    
-    <!-- Modal para mensajes -->
-    <div id="app-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+
+    <!-- Modal de mensajes -->
+    <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
-                <div id="modal-icon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <div id="modal-icon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-success-100">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-success"><path d="M20 6 9 17l-5-5"/></svg>
                 </div>
                 <h3 id="modal-title" class="text-lg leading-6 font-medium text-gray-900 mt-2">Mensaje</h3>
@@ -189,7 +188,9 @@
     <script>
         // Registrar Service Worker para PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            // Se ha cambiado la ruta a 'sw.js' (relativa) en lugar de '/sw.js' (absoluta) para
+            // manejar mejor ciertos entornos de ejecución que pueden no tener una base de URL clara.
+            navigator.serviceWorker.register('sw.js')
                 .then(reg => console.log('Service Worker registrado'))
                 .catch(err => console.error('Error al registrar Service Worker:', err));
         }
